@@ -20,6 +20,6 @@ A rework of my original [Personal-Finance-Dashboard](https://github.com/iamklage
   <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/summary.png" width = "200" />
   <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/income.png" width = "200" />
   <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/expenses.png" width = "200" />
-  <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/investments.png" width = "200" />
+  <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/assets.png" width = "200" />
 </p>
 
