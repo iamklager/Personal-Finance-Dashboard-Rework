@@ -23,3 +23,10 @@ A rework of my original [Personal-Finance-Dashboard](https://github.com/iamklage
   <img src = "https://github.com/iamklager/Personal-Finance-Dashboard-Rework/raw/main/.github/assets.png" width = "200" />
 </p>
 
+
+## Notes
+- Realized profits and losses should be entered in the Income and Expenses tabs.
+- Assets bought or sold on the current day are ignored in the dashboard.
+- Dates without price data are filled with the previous days' values (this does not happen in the raw data).
+
+

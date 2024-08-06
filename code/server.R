@@ -24,20 +24,22 @@ server <- function(input, output, session) {
     filePath       = "data/stocks.xlsx",
     readFunc       = readxl::read_xlsx
   )
+  stocks_pre <- reactive({ stocks_raw()[stocks_raw()$Date != Sys.Date(), ] })
   alternatives_raw <- reactiveFileReader(
     intervalMillis = 1000 * 60 * 60 * n_RefreshTime,
     session        = session,
     filePath       = "data/alternatives.xlsx",
     readFunc       = readxl::read_xlsx
   )
+  alternatives_pre <- reactive({ alternatives_raw()[alternatives_raw()$Date != Sys.Date(), ] })
   # Exchange rates
   xrates_stocks <- reactive({
     invalidateLater(1000 * 60 * 60 * n_RefreshTime)
-    GetXRates(stocks_raw(), c_BaseCurrency, "data/price_data/xrates/")
+    GetXRates(stocks_pre(), c_BaseCurrency, "data/price_data/xrates/")
   })
   xrates_alternatives <- reactive({
     invalidateLater(1000 * 60 * 60 * n_RefreshTime)
-    GetXRates(alternatives_raw(), c_BaseCurrency, "data/price_data/xrates/")
+    GetXRates(alternatives_pre(), c_BaseCurrency, "data/price_data/xrates/")
   })
   
   
@@ -112,64 +114,46 @@ server <- function(input, output, session) {
   })
   # Assets
   stocks_prices <- reactive({
-    res <- QueryPrices(data = stocks_raw(), path = "data/price_data/stocks/")
+    res <- QueryPrices(data = stocks_pre(), path = "data/price_data/stocks/")
+    res_names <- names(res)
     if (!is.null(res)) {
-      res <- lapply(res, function(df) {
-        res <- merge(
-          x = df, y = xrates_stocks()[[paste0(c_BaseCurrency, "/USD")]][, c("Date", "Adjusted")], 
-          by.x = "Date", by.y = "Date", all.x = TRUE, all.y = TRUE
-        )
-        for (i in 2:nrow(res)) {
-          if (is.na(res$Adjusted.y[i])) {
-            res$Adjusted.y[i] <- res$Adjusted.y[i - 1]
-          }
-        }
-        res <- res[res$Date >= min(df$Date), ]
-        res <- na.omit(res)
-        res[, c("Open", "High", "Low", "Close", "Adjusted.x")] <- res[, c("Open", "High", "Low", "Close", "Adjusted.x")] / res[, c("Adjusted.y")]
-        res <- res[, 1:(ncol(res) - 1)]
-        colnames(res)[ncol(res)] <- "Adjusted"
+      res <- lapply(res_names, function(name) {
+        df <- res[[name]]
+        currency_symbol <- unlist(stocks_pre()[stocks_pre()$TickerSymbol == name, "SourceCurrencySymbol"][1, 1])
+        res <- RateAdjustPrices(df, currency_symbol, c_BaseCurrency, xrates_stocks())
         return(res)
       })
     }
+    names(res) <- res_names
     res
   })
   alternatives_prices <- reactive({
-    res <- QueryPrices(data = alternatives_raw(), path = "data/price_data/alternatives/")
+    res <- QueryPrices(data = alternatives_pre(), path = "data/price_data/alternatives/")
+    res_names <- names(res)
     if (!is.null(res)) {
-      res <- lapply(res, function(df) {
-        res <- merge(
-          x = df, y = xrates_alternatives()[[paste0(c_BaseCurrency, "/USD")]][, c("Date", "Adjusted")],
-          by.x = "Date", by.y = "Date", all.x = TRUE, all.y = TRUE
-        )
-        for (i in 2:nrow(res)) {
-          if (is.na(res$Adjusted.y[i])) {
-            res$Adjusted.y[i] <- res$Adjusted.y[i - 1]
-          }
-        }
-        res <- res[res$Date >= min(df$Date), ]
-        res <- na.omit(res)
-        res[, c("Open", "High", "Low", "Close", "Adjusted.x")] <- res[, c("Open", "High", "Low", "Close", "Adjusted.x")] / res[, c("Adjusted.y")]
-        res <- res[, 1:(ncol(res) - 1)]
-        colnames(res)[ncol(res)] <- "Adjusted"
+      res <- lapply(res_names, function(name) {
+        df <- res[[name]]
+        currency_symbol <- unlist(alternatives_pre()[alternatives_pre()$TickerSymbol == name, "SourceCurrencySymbol"][1, 1])
+        res <- RateAdjustPrices(df, currency_symbol, c_BaseCurrency, xrates_alternatives())
         return(res)
       })
     }
+    names(res) <- res_names
     res
   })
   stocks_data <- reactive({
-    GetAssetData(stocks_raw(), stocks_prices(), xrates_stocks(), c_BaseCurrency)
+    GetAssetData(stocks_pre(), stocks_prices(), c_BaseCurrency)
   })
   alternatives_data <- reactive({
-    GetAssetData(alternatives_raw(), alternatives_prices(), xrates_alternatives(), c_BaseCurrency)
+    GetAssetData(alternatives_pre(), alternatives_prices(), c_BaseCurrency)
   })
   # Misc
   all_years <- reactive({
     as.character(min(
       ifelse(nrow(income_raw())       == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(income_raw()$Date, "%Y"))      ),
       ifelse(nrow(expenses_raw())     == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(expenses_raw()$Date, "%Y"))    ),
-      ifelse(nrow(stocks_raw())       == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(stocks_raw()$Date, "%Y"))      ),
-      ifelse(nrow(alternatives_raw()) == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(alternatives_raw()$Date, "%Y")))
+      ifelse(nrow(stocks_pre())       == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(stocks_pre()$Date, "%Y"))      ),
+      ifelse(nrow(alternatives_pre()) == 0, as.numeric(format(Sys.Date(), "%Y")), as.numeric(format(alternatives_pre()$Date, "%Y")))
     ):as.numeric(format(Sys.Date(), "%Y")))
   })
   # Profit/Loss

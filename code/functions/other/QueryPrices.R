@@ -36,8 +36,12 @@ QueryPrices <- function(data, path = "data/price_data/stocks/") {
     }
     
     # No price data exists
+    start_date <- sort(as.character(data[data$TickerSymbol == ticker_symbol, "Date"][[1]]))[1]
+    if (format(as.Date(start_date), "%m-%d") == "01-01") {
+      start_date <- paste0(as.numeric(format(as.Date(start_date), "%Y")) - 1, "-12-29")
+    }
     prices <- quantmod::getSymbols(
-      Symbols = ticker_symbol, env = NULL, warnings = FALSE, from = sort(as.character(data[data$TickerSymbol == ticker_symbol, "Date"][[1]]))[1]
+      Symbols = ticker_symbol, env = NULL, warnings = FALSE, from = start_date
     )
     prices <- ggplot2::fortify(prices)
     colnames(prices) <- sub(paste0("^", ticker_symbol, "."), "", colnames(prices))

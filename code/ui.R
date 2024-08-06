@@ -155,8 +155,8 @@ ui <- navbarPage(
       navset_card_underline(
         title = "Asset allocation" |> tooltip(l_ToolTips[["AssetAlloc"]]),
         full_screen = TRUE,
-        nav_panel(title = "Acquisition value", highchartOutput("p_AssetAllocAcq")),
-        nav_panel(title = "Current value", highchartOutput("p_AssetAllocCur"))
+        nav_panel(title = "Current value", highchartOutput("p_AssetAllocCur")),
+        nav_panel(title = "Acquisition value", highchartOutput("p_AssetAllocAcq"))
       ),
       navset_card_underline(
         title = "Asset gains" |> tooltip(l_ToolTips[["AssetGain"]]),

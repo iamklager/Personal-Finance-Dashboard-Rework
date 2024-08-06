@@ -1,7 +1,7 @@
 #### GetAssetData
 # Preprocesses asset data to be used for the plots.
 
-GetAssetData <- function(data, price_data, xrate_data, base_currency) {
+GetAssetData <- function(data, price_data, base_currency) {
   # Breakout condition: The stock dataframe is empty
   if (nrow(data) == 0) { return(NULL) }
   all_symbols <- unique(data$TickerSymbol)
