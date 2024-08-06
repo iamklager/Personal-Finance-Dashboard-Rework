@@ -3,6 +3,7 @@
 
 HCPriceDev <- function(assets, yearmonth_start, yearmonth_end, dark_mode_on) {
   assets <- dplyr::bind_rows(lapply(assets, function(df) {
+    if (nrow(df) == 1) { return(NULL) }
     df$YearMonth <- as.numeric(df$YearMonth)
     df <- df[df$YearMonth >= as.numeric(yearmonth_start) & df$YearMonth <= as.numeric(yearmonth_end), ]
     if (nrow(df) == 0) {

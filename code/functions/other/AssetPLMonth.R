@@ -19,6 +19,15 @@ AssetPLMonth <- function(assets, yearmonth_start, yearmonth_end) {
         CumProfitLoss = NULL
       )
       return(res)
+    } else if (nrow(asset) == 1) {
+      res <- data.frame(
+        Date = asset$Date[1],
+        YearMonth = asset$YearMont[1],
+        DisplayName = asset$DisplayName[1],
+        ProfitLoss = 0,
+        CumProfitLoss = 0
+      )
+      return(res)
     }
     
     ## Cumulative profit/loss

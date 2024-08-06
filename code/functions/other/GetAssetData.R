@@ -20,6 +20,10 @@ GetAssetData <- function(data, price_data, base_currency) {
     asset <- asset[which(!is.na(asset$DisplayName))[1]:nrow(asset), ]
     
     asset <- asset[, colnames(asset) %in% c("Date", "YearMonth", "DisplayName", "PriceTotal", "Quantity", "Adjusted")]
+    if (nrow(asset) == 1) {
+      asset$YearMonth <- format(as.Date(asset$Date), "%Y%m")
+      return(asset)
+    }
     for (i in 2:nrow(asset)) {
       if (is.na(asset$Quantity[i])) {
         asset$Quantity[i] <- asset$Quantity[i - 1]
